@@ -4,18 +4,17 @@ class Initializer:
 
     def __init__(self, *args, **kwargs):
         pass
-
-    def start_up(self):
+    
+    @staticmethod
+    def start_up():
         # Create a new window for the application
-        self.app = Application()
+        app = Application()
 
         # Draw the window and start the application
-        self.app.mainloop()
-
+        app.mainloop()
 
 
 
 if __name__ == "__main__":
-    init = Initializer()
-    init.start_up()
+    Initializer.start_up()
         
