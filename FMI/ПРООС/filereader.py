@@ -10,5 +10,6 @@ class FileReader:
     def read(file_name):
         users = []
         with open(file_name, "r") as f:
+            # Consider using csv files instead maybe ?
             users = f.readlines()
         return [sub("\t", " ", user).rstrip() for user in users]

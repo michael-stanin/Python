@@ -9,5 +9,6 @@ class FileWriter:
     def write(file_name, *args):
         # Write the user information.
         with open(file_name, "a") as f:
-            f.write("\t".join("{}".format(arg) for arg in args))
+            # Consider using csv files instead maybe ?
+            f.write("\t".join("{0:10}".format(arg) for arg in args))
             f.write("\n")
