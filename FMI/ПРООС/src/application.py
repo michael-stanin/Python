@@ -20,7 +20,7 @@ class Application(tk.Tk):
         self.m_geometry = tk.Tk.geometry(self, newGeometry="800x600+250+100")
         
         # Set the window icon
-        self.m_iconbitmap = tk.Tk.iconbitmap(self, bitmap="favicon-32.ico")
+        self.m_iconbitmap = tk.Tk.iconbitmap(self, bitmap="../images/favicon-32.ico")
 
         # Username and password labels
         #self.m_user_name_label = tk.Label(text="username: ", fg="blue")
@@ -29,7 +29,7 @@ class Application(tk.Tk):
         #self.m_user_pass_label.grid(row=1, column=0)
         
         # Background
-        self.background_image = tk.PhotoImage("background1.jpg")
+        self.background_image = tk.PhotoImage("../images/background1.jpg")
         self.background_label = tk.Label(self,image=self.background_image)
         self.background_label.pack()
 
