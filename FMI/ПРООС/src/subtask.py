@@ -39,4 +39,4 @@ class Subtask:
         if value in ("None", "Started", "Finished"):
             self.state_ = value
         else:
-            raise ValueError("{} is not a correct state!")
+            raise ValueError("{} is not a correct State!")

@@ -14,11 +14,11 @@ class Student(User):
 
     @gender.setter
     def gender(self, value):
-        if value in ("male", "female"):
+        if value in ("Male", "Female"):
             self.gender_ = value
         else:
             raise ValueError(
-                "{} is not possible value for gender!".format(value))
+                "{} is not possible value for Gender!".format(value))
     @property
     def tasks(self):
         return self.tasks_
@@ -28,7 +28,7 @@ class Student(User):
         if isinstance(value, list) and value:
             self.tasks_ = value
         else:
-            raise ValueError("Tasks for student are empty!")
+            raise ValueError("Tasks for Student are empty!")
         
     def add_task(self, task):
         if isinstance(task, Task):
@@ -40,4 +40,4 @@ class Student(User):
         if task in self.tasks_:
             self.tasks_.remove(task)
         else:
-            raise KeyError("{} is not in student's tasks!".format(task))
+            raise KeyError("{} is not in Student's Tasks!".format(task))

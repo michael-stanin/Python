@@ -37,7 +37,7 @@ class TestUser(unittest.TestCase):
             user.last_name = last_name
 
     def test_valid_rights(self):
-        rights = "administrator"
+        rights = "Administrator"
         user = User()
         user.rights = rights
         self.assertEqual(rights, user.rights)
@@ -51,7 +51,7 @@ class TestUser(unittest.TestCase):
 class TestStudent(unittest.TestCase):
     
     def test_valid_gender(self):
-        gender = "male"
+        gender = "Male"
         student = Student()
         student.gender = gender
         self.assertEqual(gender, student.gender)

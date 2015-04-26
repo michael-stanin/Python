@@ -49,4 +49,4 @@ class Task:
         if subtask in self.subtasks_:
             self.subtasks_.remove(subtask)
         else:
-            raise KeyError("{} is not in student's tasks!".format(subtask))
+            raise KeyError("{} is not in Student's Tasks!".format(subtask))

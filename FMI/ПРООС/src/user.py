@@ -14,7 +14,7 @@ class User:
         if value != "":
             self.first_name_ = value
         else:
-            raise ValueError("First name for user is empty!")
+            raise ValueError("First name for the User is empty!")
 
     @property
     def last_name(self):
@@ -25,7 +25,7 @@ class User:
         if value != "":
             self.last_name_ = value
         else:
-            raise ValueError("Last name for user is empty!")
+            raise ValueError("Last name for the User is empty!")
 
     @property
     def rights(self):
@@ -33,8 +33,8 @@ class User:
 
     @rights.setter
     def rights(self, value):
-        if value in ("administrator", "student"):
+        if value in ("Administrator", "Student"):
             self.rights_ = value
         else:
             raise ValueError(
-                "{} is not possible value for rights".format(value))
+                "{} is not possible value for Rights".format(value))
