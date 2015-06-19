@@ -380,6 +380,7 @@ class Menu:
 
     def _toNextUnit(self):
         frame, buttons = self.frames[self.notebook.index(self.current_tab)]
+        buttons[3].configure(background="green")
         frame.configure(background="green")
         self.load_dictation_frame.grid_forget()
         self.tabs = self.notebook.tabs()
