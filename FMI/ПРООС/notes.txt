@@ -4,3 +4,5 @@
  - Or maybe just change the master for both login and menu frames to be the master of the application object instead of the application itself ? 
 
 2. Check the example of Notebook tkinter in the chrome bookmarks... Maybe grid_row/columnconfigure would help ? 
+
+Done and Done...
