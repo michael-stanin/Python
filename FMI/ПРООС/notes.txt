@@ -1,0 +1,6 @@
+1. Rethink the use of the application.py module. 
+ - Consider using another root object to split successfully the login frame and the menu frame and everything else.
+ Thus it'll let you to use both pack() and grid() independently for each frame.
+ - Or maybe just change the master for both login and menu frames to be the master of the application object instead of the application itself ? 
+
+2. Check the example of Notebook tkinter in the chrome bookmarks... Maybe grid_row/columnconfigure would help ? 

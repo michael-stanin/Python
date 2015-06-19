@@ -4,6 +4,8 @@ import tkinter as tk
 from loginframe import *
 from menuframe import *
 
+from menu_ import Menu
+
 class Application(tk.Tk):
     
     def __init__(self, *args, **kwargs):
@@ -28,21 +30,23 @@ class Application(tk.Tk):
 
         
         # Menu Frame
-        self.menuFrame = MenuFrame(self)
+        #self.menuFrame = MenuFrame(self)
+        self.menu = Menu(self)
         
         self.show()
-        
+
         self.callback()
         
     def callback(self):
         # Check every 200 ms if the user has logged in
         self.after_id = self.after(1000, self.callback)
         if self.loginFrame.logged_in:
-            self.menuFrame.show()
+            self.menu.show()
             self.after_cancel(self.after_id)
 
     def show(self):
         self.background_label.grid(sticky=N+S+E+W)
         self.loginFrame.show()
+        
         
     

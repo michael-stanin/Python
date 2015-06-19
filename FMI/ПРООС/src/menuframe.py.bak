@@ -10,6 +10,7 @@ class MenuFrame(BaseFrame):
     def __init__(self, master=None, *args, **kwargs):
         BaseFrame.__init__(self, master, *args, **kwargs)
 
+        #self.place(anchor=W)
         self.master = master
         
         #self.menu = Menu(self.master)
