@@ -4,7 +4,7 @@ import tkinter as tk
 from loginframe import *
 from menuframe import *
 
-from menu_ import Menu
+from menu import Menu
 
 class Application(tk.Tk):
     
