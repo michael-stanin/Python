@@ -2,9 +2,7 @@ import sys
 import tkinter as tk
 
 from loginframe import *
-from menuframe import *
-
-from menu import Menu
+from menu import *
 
 class Application(tk.Tk):
     
