@@ -1,7 +1,7 @@
 import sys
 from tkinter import LEFT, RIGHT, BOTH
 from tkinter import X, Y
-from tkinter import Label, Entry, messagebox, StringVar
+from tkinter import Label, Entry, messagebox, StringVar, PhotoImage
 from tkinter import N, S, W, E
 
 from baseframe import *
@@ -33,26 +33,32 @@ class LoginFrame(BaseFrame):
         self._show_entries()
         self._show_buttons()     
 
-    def _makelabel(self, row=0, rowspan=1, sticky=E, **options):
+    def _makelabel(self, row=0, rowspan=1, sticky=E , columnspan=1, **options):
         label = Label(self, **options)
-        label.grid(row=row, sticky=sticky, rowspan=rowspan)
+        label.grid(row=row, sticky=sticky, rowspan=rowspan, columnspan=columnspan)
         return label
     
+    def _show_funny_owl_label(self):
+        img = PhotoImage(file="../images/funnyowl.png")
+        self.funnyowl = self._makelabel(sticky=N, columnspan=2, image=img)
+        self.funnyowl.image = img
+
     def _show_labels(self):
+        self._show_funny_owl_label()
         self._show_username_label()
         self._show_password_label()
 
     def _show_username_label(self):
-        self.username_label = self._makelabel(0, 1, E,
+        self.username_label = self._makelabel(1, 1, E,
                             text="Потребителско име:", bg=SEA_GREEN)
 
     def _show_password_label(self):
-        self.password_label = self._makelabel(1, 1, E,
+        self.password_label = self._makelabel(2, 1, E,
                             text="Парола:", bg=SEA_GREEN)
 
-    def _makeentry(self, row, column, **options):
+    def _makeentry(self, row, column, sticky=W, **options):
         entry = Entry(self, **options)
-        entry.grid(row=row, column=column)
+        entry.grid(row=row, column=column, sticky=sticky)
         return entry
     
     def _show_entries(self):
@@ -61,13 +67,13 @@ class LoginFrame(BaseFrame):
         
     def _show_username_entry(self):
         self.username = StringVar()
-        self.username_entry = self._makeentry(0, 1, width=20,
+        self.username_entry = self._makeentry(1, 1, width=20,
                             textvariable=self.username, bg=SEA_GREEN)
         self.username_entry.focus_set()
 
     def _show_password_entry(self):
         self.password = StringVar()
-        self.password_entry = self._makeentry(1, 1, width=20, show="*",
+        self.password_entry = self._makeentry(2, 1, width=20, show="*",
                             textvariable=self.password, bg=SEA_GREEN)
     
     def _show_buttons(self):
@@ -77,7 +83,7 @@ class LoginFrame(BaseFrame):
         self.login_button = BaseButton(self, text="Влез")
         self.login_button.bind("<Button-1>", self.login)
         self.login_button.bind("<Return>", self.login)
-        self.login_button.grid(row=2, sticky=N+S+E+W, columnspan=2)
+        self.login_button.grid(row=3, sticky=N+S+E+W, columnspan=2)
 
     def hide(self):
         self._hide_labels()
