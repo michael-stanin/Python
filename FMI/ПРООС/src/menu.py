@@ -1,6 +1,6 @@
 from tkinter import ttk, Frame, Button, PhotoImage, Label
 from tkinter import N, S, E, W
-from content import *
+from content import IntroContent
 import os, os.path
 
 SEA_GREEN = "#2E8B57"
@@ -18,7 +18,7 @@ class Menu:
         self._style_config()
 
         self._fill_notebook()
-        self.content = IntroContent
+        self.content = IntroContent()
 
     def show(self):
         self._fill_notebook()
@@ -31,7 +31,7 @@ class Menu:
     def _fill_notebook(self):
 
         ################# PATCH PATCH PATCH #################
-        for i in range(1, 11):
+        for i in range(1, 31):
             frame = self._create_frame(self.notebook, borderwidth=5,
                                       relief="sunken", bg="green")
 
@@ -44,7 +44,7 @@ class Menu:
             
             self._store_frame(frame, buttons)
 
-            self.add_unit(frame, text="Урок " + str(i), state="disabled")
+            self.add_unit(frame, text="Урок " + str(i), state="disabled", sticky=E+W)
 
         self.tabs = self.notebook.tabs()
         self.current_tab = self.tabs[0]
