@@ -1,15 +1,14 @@
-import sys
 import tkinter as tk
 from PIL import Image, ImageTk
 
 from loginframe import *
 from menu import *
 
+
 class Application(tk.Tk):
     
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
 
         # Set window title
         self.m_title = tk.Tk.title(self, string="Learn by practice")
@@ -33,7 +32,9 @@ class Application(tk.Tk):
         
         # Menu Frame
         self.menu = Menu(self)
-        
+
+        self.after_id = None
+
         self.show()
 
         self.callback()
@@ -49,19 +50,18 @@ class Application(tk.Tk):
         self.loginFrame.show()
         
         
-    
 class BackgroundFrame(Frame):
     def __init__(self, master, *pargs):
         Frame.__init__(self, master, *pargs)
         self.master = master
 
         # Uncomment below if continuous resizing is required, i.e the window is resizable
-        #self.master.bind('<Configure>', self._resize_image)
+        # self.master.bind('<Configure>', self._resize_image)
 
-        self.grid(row=0,sticky=N+S+E+W)
+        self.grid(row=0, sticky=N+S+E+W)
 
         self.image = Image.open("../images/background1.png")
-        self.img_copy= self.image.copy()
+        self.img_copy = self.image.copy()
 
         self.background_image = ImageTk.PhotoImage(self.image)
 
@@ -73,9 +73,8 @@ class BackgroundFrame(Frame):
         self._resize_image_once()
 
     def _resize_image(self, event=None, _last=[None] * 2):
-        if event is not None and event.widget is self.master and (
-            _last[0] != event.width or _last[1] != event.height):
-
+        if event is not None and event.widget is self.master and\
+                (_last[0] != event.width or _last[1] != event.height):
             # size changed; update image
             _last[:] = event.width, event.height
             self._resize_image_once()
