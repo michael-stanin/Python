@@ -1,5 +1,5 @@
-from tkinter import ttk, Frame, Button, PhotoImage, Label
-from tkinter import N, S, E, W
+from tkinter import ttk, Frame, Button, PhotoImage, Label, Entry, messagebox
+from tkinter import N, S, E, W, RAISED, SUNKEN, StringVar
 from content import IntroContent
 import os, os.path
 
