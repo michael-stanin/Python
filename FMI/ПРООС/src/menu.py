@@ -40,6 +40,9 @@ class Menu:
             frame.grid(column=0, row=1, columnspan=1, rowspan=1,
                        sticky=(N, S, E, W))
 
+            for i, b in enumerate(buttons):
+                frame.columnconfigure(i, weight=1)
+
             self._show_buttons(buttons)
             
             self._store_frame(frame, buttons)
