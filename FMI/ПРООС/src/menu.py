@@ -17,11 +17,12 @@ class Menu:
 
         self._style_config()
 
-        self._fill_notebook()
         self.content = IntroContent()
 
     def show(self):
+        self.notebook.grid(column=0, row=0, columnspan=2, sticky=N)
         self._fill_notebook()
+
 
 
     def _style_config(self):
@@ -40,8 +41,8 @@ class Menu:
             frame.grid(column=0, row=1, columnspan=1, rowspan=1,
                        sticky=(N, S, E, W))
 
-            for i, b in enumerate(buttons):
-                frame.columnconfigure(i, weight=1)
+            for bi, b in enumerate(buttons):
+                frame.columnconfigure(bi, weight=1)
 
             self._show_buttons(buttons)
             
@@ -109,9 +110,6 @@ class Menu:
     def _create_frame(self, master, **kwargs):
         frame = Frame(master, **kwargs)
         return frame
-    
-    def show(self):
-        self.notebook.grid(column=0, row=0, columnspan=2, sticky=N)
 
     def add_unit(self, frame, **kwargs):
         self.notebook.add(frame, **kwargs)
