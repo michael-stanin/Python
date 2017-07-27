@@ -1,4 +1,15 @@
 from re import sub
+import xml.etree.ElementTree as ElementTree
+
+tree = ElementTree.parse("units.xml")
+root = tree.getroot()
+
+
+def exercises(unit):
+    return [[word.text for word in words] for exercise in unit for ex in exercise for words in ex]
+
+def units():
+    return [[unit.get("name"), unit.get("images"), exercises(unit)] for unit in root]
 
 
 class FileReader:
@@ -20,4 +31,5 @@ class FileReader:
         with open(file_name, "r") as f:
             units = f.readlines()
         return [sub("\_*", "", unit).rstrip() for unit in units]
-        
+
+

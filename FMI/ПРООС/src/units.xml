@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<units>
+    <unit name="Буквата Аа" images = "../images/Letters/a/">
+        <exercises>
+            <ex>
+                <words>
+                    <word>Агне</word>
+                    <word>розА</word>
+                    <word>мАмА</word>
+                </words>
+            </ex>
+            <ex>
+                <words>
+                    <word>рАницА</word>
+                    <word>полА</word>
+                    <word>шАпкА</word>
+                </words>
+            </ex>
+        </exercises>
+    </unit>
+    <unit name="Буквата Ъъ" images = "../images/Letters/ъ/">
+        <exercises>
+            <ex>
+                <words>
+                    <word>Агне</word>
+                    <word>розА</word>
+                    <word>мАмА</word>
+                </words>
+            </ex>
+            <ex>
+                <words>
+                    <word>рАницА</word>
+                    <word>полА</word>
+                    <word>шАпкА</word>
+                </words>
+            </ex>
+        </exercises>
+    </unit>
+</units>

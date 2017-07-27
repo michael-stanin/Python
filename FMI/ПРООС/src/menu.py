@@ -1,9 +1,15 @@
 from tkinter import ttk, Frame, Button, PhotoImage, Label, Entry, messagebox
 from tkinter import N, S, E, W, RAISED, SUNKEN, StringVar
-from content import IntroContent
-import os, os.path
+from unitsmanager import UnitsManager
+from utilities import *
 
-SEA_GREEN = "#2E8B57"
+
+def style_config():
+    ttk.Style().configure("RB.TButton", foreground='maroon',
+                          background='black', font=('Helvetica', 12))
+
+style_config()
+
 
 class Menu:
 
@@ -15,36 +21,19 @@ class Menu:
 
         self.frames = []
 
-        self._style_config()
-
-        self.content = IntroContent()
-
     def show(self):
         self.notebook.grid(column=0, row=0, columnspan=2, sticky=N)
         self._fill_notebook()
 
-
-
-    def _style_config(self):
-        ttk.Style().configure("RB.TButton", foreground='maroon',
-                              background='black', font=('Helvetica', 12))
-        
     def _fill_notebook(self):
-
-        ################# PATCH PATCH PATCH #################
-        for i in range(1, 31):
-            frame = self._create_frame(self.notebook, borderwidth=5,
-                                      relief="sunken", bg="green")
+        for i in range(1, len(mgr.units) + 1):
+            frame = create_frame(self.notebook, borderwidth=5, relief="sunken", bg="green")
 
             buttons = self._create_buttons(frame)
 
-            frame.grid(column=0, row=1, columnspan=1, rowspan=1,
-                       sticky=(N, S, E, W))
+            configure_frame(frame, buttons)
 
-            for bi, b in enumerate(buttons):
-                frame.columnconfigure(bi, weight=1)
-
-            self._show_buttons(buttons)
+            configure_buttons(buttons)
             
             self._store_frame(frame, buttons)
 
@@ -52,44 +41,26 @@ class Menu:
 
         self.tabs = self.notebook.tabs()
         self.current_tab = self.tabs[0]
-        
-        self._enable_tabs()
-        self._enable_started_button("yellow")
-            
-        #self._initial_coloring(frame, buttons)
+        self.current_notebook_tab_index = self.notebook.index(self.current_tab)
 
-    def _enable_tabs(self):
+        self._enable_current_tab()
+        self._enable_intro_button("yellow")
+
+    def _enable_current_tab(self):
         self.notebook.tab(self.current_tab, state="normal")
 
-    def _enable_started_button(self, color):
-        frame, buttons = self.frames[self.notebook.index(self.current_tab)]
-        for button in buttons:
-            if button["background"] != color:
-                button.configure(background=color)
-                button.configure(command=self._loadIntro)
-                break
+    def _enable_intro_button(self, color):
+        frame, buttons = self.frames[self.current_notebook_tab_index]
 
-        #buttons[1].configure(command=self._loadFirstEx)
-        #buttons[2].configure(command=self._loadSecondEx)
-        #buttons[3].configure(command=self._loadDictation)
+        intro_button = buttons[0]
+        if intro_button["background"] != color:
+            intro_button.configure(background=color)
+            intro_button.configure(relief=SUNKEN)
+            intro_button.configure(command=self._load_intro)
 
-        
-    def _initial_coloring(self, frame, buttons):
-        ################# PATCH PATCH PATCH #################
-        # Color only the first one, since we are not storing the results
-        # of the done units yet...
-        frame, buttons = self.frames[0]
-        
-        buttons[0].configure(background="yellow")
-        buttons[0].config(relief=SUNKEN)
+        # TODO: Think how to change the colors of the notebook tabs:
+        # https://stackoverflow.com/questions/23038356/change-color-of-tab-header-in-ttk-notebook
 
-        frame.configure(background="yellow")
-        frame.configure(relief=SUNKEN)
-        
-    def _show_buttons(self, buttons):
-        for i, b in enumerate(buttons):
-            b.grid(column=i, row=1, sticky=(N, S, E, W))
-    
     def _store_frame(self, frame, buttons):
         self.frames.append((frame, buttons))
     
@@ -105,316 +76,224 @@ class Menu:
         buttons.append(ex2)
         buttons.append(dictation)
 
+        self.current_button_idx = 0
+
         return buttons
-        
-    def _create_frame(self, master, **kwargs):
-        frame = Frame(master, **kwargs)
-        return frame
 
     def add_unit(self, frame, **kwargs):
         self.notebook.add(frame, **kwargs)
 
-    def _create_label_images(self, master, path):
-        labels = []
-        for i in range(4):
-            img = PhotoImage(file=path + "a" + str(i+1) + ".png")
-            lbl = Label(master, image=img)
-            lbl.image = img
-            labels.append(lbl)
+    def _first_unit_exercise(self, event):
+        # Prepare the notebook for the next unit
+        frame, buttons = self.frames[self.current_notebook_tab_index]
+        buttons[self.current_button_idx].configure(background="green")
+        self.current_button_idx += 1
+        buttons[self.current_button_idx].configure(background="yellow")
+        self.intro_frame.grid_forget()
 
-        return labels
+        self._load_first_exercise()
 
-    def _show_label_images(self, labels):
-        for i, label in enumerate(labels):
-            label.grid(row=1, column=i, sticky=(N, E, S, W), padx=5, pady=5)
+    def _load_first_exercise(self):
+        self.current_ex_frame = self.first_ex_frame = create_content_frame(self.master)
 
-    def _loadIntro(self):
-        self.load_intro_frame = self._create_frame(self.master, width=450, height=400, relief=RAISED, borderwidth=1, background=SEA_GREEN)
+        heading = Label(self.first_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
+        pictures = create_images(self.first_ex_frame, mgr.current_ex_path())
 
-        heading = Label(self.load_intro_frame, text="Буквата Аа", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        labels = self._create_label_images(self.load_intro_frame, "../images/Letters/a/")
+        self.current_ex_entries = self.first_ex_entries = load_entries(self.first_ex_frame)
+        show_pictures(pictures)
+        heading.grid(row=0, sticky=(N, S, E, W), columnspan=len("".join(mgr.current_ex))+1)
+        self.first_ex_frame.grid(row=0, column=0)
 
-        self._show_label_images(labels)
-        heading.grid(row=0, sticky=(N, S, E, W), columnspan=4)
-        self.load_intro_frame.grid(row=0, column=0)
+        prev_button = Button(self.first_ex_frame, text="Назад", command=self._to_intro)
+        prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        prevButton = Button(self.load_intro_frame, text="Назад", state="disabled", width=10)
-        prevButton.grid(row=2, column=0, sticky=(W,S))
+        self.current_next_button = self.load_first_ex_frame_nextButton = Button(self.first_ex_frame, text="Продължи", state="disabled")
+        self.load_first_ex_frame_nextButton.grid(row=3, column=len("".join(mgr.current_ex)), sticky=(E, S))
+        if mgr.current_ex_idx < len(self.current_unit.exercises):
+            self.load_first_ex_frame_nextButton.bind("<Button-1>", self._next_unit_exercise)
 
-        nextButton = Button(self.load_intro_frame, text="Продължи", width=10, command=self._toFirstEx)
-        nextButton.grid(row=2, column=3, sticky=(E,S))
+        self._current_ex_callback()
 
-    def _toFirstEx(self):
-        frame, buttons = self.frames[self.notebook.index(self.current_tab)]
-        buttons[0].configure(background="green")
-        buttons[1].configure(background="yellow")
-        self.load_intro_frame.grid_forget()
-        self._loadFirstEx()
+    def _next_unit_exercise(self, event):
+        if self._check_exercise_answers():
+            messagebox.showinfo("Правилен отговор", ":) Продължавай напред!")
+            frame, buttons = self.frames[self.current_notebook_tab_index]
+            buttons[self.current_button_idx].configure(background="green")
+            self.current_button_idx += 1
+            buttons[self.current_button_idx].configure(background="yellow")
+            self.current_ex_frame.grid_forget()
+            mgr.next_ex()
+            self._load_second_exercise()
 
-    def _toIntro(self):
-        self.load_intro_frame.grid(row=0, column=0)
-        self.load_first_ex_frame.grid_forget()
+    def _load_second_exercise(self):
+        self.current_ex_frame = self.load_second_ex_frame = create_content_frame(self.master)
 
-    def _load_pictures(self, master, path, pictures):
-        out_pictures = []
-        for picture in pictures:
-            img = PhotoImage(file=path + picture)
-            lbl = Label(master, image=img)
-            lbl.image = img
-            out_pictures.append(lbl)
-        return out_pictures
+        heading = Label(self.load_second_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
+        pictures = create_images(self.load_second_ex_frame, mgr.current_ex_path())
 
-    def _show_pictures1(self, pictures):
-        columnn = 0
-        for picture in pictures:
-            picture.grid(row=1, columnspan=4, column=columnn, sticky=(S, N, W), padx=5, pady=5)
-            columnn += 4
-
-    def _makeentry(self, master, row, column, **options):
-        entry = Entry(master, **options)
-        entry.grid(row=row, column=column)
-        return entry
-
-
-    def _load_entries1(self, master):
-        entries = []
-        for i in range(12):
-            entry_string = StringVar()
-            entry = self._makeentry(master, 2, i, width=2,
-                            textvariable=entry_string, bg="cyan")
-            if i in (0, 7, 9, 11):
-                entry.configure(bg="dark cyan")
-            
-            entries.append((entry, entry_string))
-        return entries
-        
-    def first_ex_callback(self):
-        # Check every 200 ms if the user has logged in
-        self.after_first_ex_id = self.load_first_ex_frame.after(200, self.first_ex_callback)
-
-        filled = False
-
-        for (entry, string) in self.first_ex_entries:
-            filled = not(string.get() == "")
-            entry.delete(1, len(string.get()))
-
-        if filled:
-            self.load_first_ex_frame.after_cancel(self.after_first_ex_id)
-            self.load_first_ex_frame_nextButton.configure(state="normal")
-
-    def _check_firstEx_answers(self, expected):
-        actual = ""
-        for (entry, string) in self.first_ex_entries:
-            actual += string.get()
-        
-        # Gather all wrong input
-        wrong_entries = []
-        [wrong_entries.append(i) for i, ch in enumerate(actual) if not(ch == expected[i])]
-
-        # Color the wrong input
-        [self.first_ex_entries[wr][0].configure(background="red") for wr in wrong_entries]
-
-        if wrong_entries:
-            messagebox.showinfo("Грешен отговор",
-            ":( Опитай пак!")
-            # Change back color of the entries to their default and reset the text as well
-            for wrong_entry in wrong_entries:
-                if wrong_entry in (0, 7, 9, 11):
-                    self.first_ex_entries[wrong_entry][0].configure(bg="dark cyan")
-                else:
-                    self.first_ex_entries[wrong_entry][0].configure(bg="cyan")
-                self.first_ex_entries[wrong_entry][1].set("")
-            self.load_first_ex_frame_nextButton.configure(state="disabled")
-            self.first_ex_callback()
-            return False
-        return True
-
-
-    def _loadFirstEx(self):
-        self.load_first_ex_frame = self._create_frame(self.master, width=450, height=400, relief=RAISED, borderwidth=1, background=SEA_GREEN)
-
-        heading = Label(self.load_first_ex_frame, text="Буквата Аа", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = self._load_pictures(self.load_first_ex_frame, "../images/Letters/a/", ["Агне.png", "rose.png", "maika.png"])
-
-        self.first_ex_entries = self._load_entries1(self.load_first_ex_frame)
-        self._show_pictures1(pictures)
-        heading.grid(row=0, sticky=(N, S, E, W), columnspan=12)
-        self.load_first_ex_frame.grid(row=0, column=0)
-
-        prevButton = Button(self.load_first_ex_frame, text="Назад", command=self._toIntro)#, width=10
-        prevButton.grid(row=3, column=0, sticky=(W,S))
-
-        self.load_first_ex_frame_nextButton = Button(self.load_first_ex_frame, text="Продължи", state="disabled", command=self._toSecondEx)#, width=10
-        self.load_first_ex_frame_nextButton.grid(row=3, column=11, sticky=(E,S))
-
-        self.first_ex_callback()
-
-    def _toSecondEx(self):
-        if self._check_firstEx_answers("агнерозамама"):
-            messagebox.showinfo("Правилен отговор",
-            ":) Продължавай напред!")
-            frame, buttons = self.frames[self.notebook.index(self.current_tab)]
-            buttons[1].configure(background="green")
-            buttons[2].configure(background="yellow")
-            self.load_first_ex_frame.grid_forget()
-            self._loadSecondEx()
-
-    def _show_pictures2(self, pictures):
-        columnn = 0
-        for i, picture in enumerate(pictures):
-            if i == 0:
-                picture.grid(row=1, columnspan=6, column=columnn, sticky=(S, N, W), padx=5, pady=5)
-                columnn += 6
-            elif i == 1:
-                picture.grid(row=1, columnspan=4, column=columnn, sticky=(S, N, W), padx=5, pady=5)
-                columnn += 4
-            else:
-                picture.grid(row=1, columnspan=5, column=columnn, sticky=(S, N, W), padx=5, pady=5)
-                columnn += 5
-
-    def _load_entries2(self, master):
-        entries = []
-        for i in range(15):
-            entry_string = StringVar()
-            entry = self._makeentry(master, 2, i, width=2,
-                            textvariable=entry_string, bg="cyan")
-            if i in (1, 5, 9, 11, 14):
-                entry.configure(bg="dark cyan")
-            
-            entries.append((entry, entry_string))
-        return entries
-
-    def second_ex_callback(self):
-        # Check every 200 ms if the user has logged in
-        self.after_second_ex_id = self.load_second_ex_frame.after(200, self.second_ex_callback)
-
-        filled = False
-
-        for (entry, string) in self.second_ex_entries:
-            filled = not(string.get() == "")
-            entry.delete(1, len(string.get()))
-
-        if filled:
-            self.load_second_ex_frame.after_cancel(self.after_second_ex_id)
-            self.load_second_ex_frame_nextButton.configure(state="normal")
-
-    def _check_secondEx_answers(self, expected):
-        actual = ""
-        for (entry, string) in self.second_ex_entries:
-            actual += string.get()
-        
-        # Gather all wrong input
-        wrong_entries = []
-        [wrong_entries.append(i) for i, ch in enumerate(actual) if not(ch == expected[i])]
-
-        # Color the wrong input
-        [self.second_ex_entries[wr][0].configure(background="red") for wr in wrong_entries]
-
-        if wrong_entries:
-            messagebox.showinfo("Грешен отговор",
-            ":( Опитай пак!")
-            # Change back color of the entries to their default and reset the text as well
-            for wrong_entry in wrong_entries:
-                if wrong_entry in (1, 5, 9, 11, 14):
-                    self.second_ex_entries[wrong_entry][0].configure(bg="dark cyan")
-                else:
-                    self.second_ex_entries[wrong_entry][0].configure(bg="cyan")
-                self.second_ex_entries[wrong_entry][1].set("")
-            self.load_second_ex_frame_nextButton.configure(state="disabled")
-            self.second_ex_callback()
-            return False
-        return True
-
-    def _loadSecondEx(self):
-        self.load_second_ex_frame = self._create_frame(self.master, width=450, height=400, relief=RAISED, borderwidth=1, background=SEA_GREEN)
-
-        heading = Label(self.load_second_ex_frame, text="Буквата Аа", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = self._load_pictures(self.load_second_ex_frame, "../images/Letters/a/", ["ranica.png", "пола.png", "шапка.png"])
-
-        self.second_ex_entries = self._load_entries2(self.load_second_ex_frame)
-        self._show_pictures2(pictures)
-        heading.grid(row=0, sticky=(N, S, E, W), columnspan=15)
+        self.current_ex_entries = self.second_ex_entries = load_entries(self.load_second_ex_frame)
+        show_pictures(pictures)
+        heading.grid(row=0, sticky=(N, S, E, W), columnspan=len("".join(mgr.current_ex))+1)
         self.load_second_ex_frame.grid(row=0, column=0)
 
-        prevButton = Button(self.load_second_ex_frame, text="Назад", command=self._backToFirstEx)#, width=10
-        prevButton.grid(row=3, column=0, sticky=(W,S))
+        prev_button = Button(self.load_second_ex_frame, text="Назад", command=self._back_to_first_ex)
+        prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        self.load_second_ex_frame_nextButton = Button(self.load_second_ex_frame, text="Продължи", state="disabled", command=self._toDictation)#, width=10
-        self.load_second_ex_frame_nextButton.grid(row=3, column=14, sticky=(E,S))
+        self.current_next_button = self.load_second_ex_frame_nextButton = Button(self.load_second_ex_frame, text="Продължи", state="disabled")
+        self.load_second_ex_frame_nextButton.grid(row=3, column=len("".join(mgr.current_ex)), sticky=(E, S))
 
-        self.second_ex_callback()
+        if mgr.current_ex_idx + 1 < len(self.current_unit.exercises):
+            self.load_second_ex_frame_nextButton.bind("<Button-1>", self._next_unit_exercise)
+        else:
+            self.load_second_ex_frame_nextButton.bind("<Button-1>", self._to_dictation)
 
+        self._current_ex_callback()
 
-    def _backToFirstEx(self):
-        self.load_first_ex_frame.grid(row=0, column=0)
+    def _check_exercise_answers(self):
+        words = "".join(mgr.current_ex)
+        actual = ""
+        for (entry, string) in self.current_ex_entries:
+            actual += string.get()
+
+        # Gather all wrong input
+        wrong_entries = []
+        [wrong_entries.append(i) for i, ch in enumerate(actual) if not (ch == words[i].lower())]
+
+        # Color the wrong input
+        [self.current_ex_entries[wr][0].configure(background="red") for wr in wrong_entries]
+
+        if wrong_entries:
+            messagebox.showinfo("Грешен отговор", ":( Опитай пак!")
+            # Change back color of the entries to their default and reset the text as well
+            for wrong_entry in wrong_entries:
+                if words[wrong_entry].isupper():
+                    self.current_ex_entries[wrong_entry][0].configure(bg="dark cyan")
+                else:
+                    self.current_ex_entries[wrong_entry][0].configure(bg="cyan")
+                self.current_ex_entries[wrong_entry][1].set("")
+            self.current_next_button.configure(state="disabled")
+            self._current_ex_callback()
+            return False
+        return True
+
+    def _load_intro(self):
+        self.current_unit = mgr.current_unit
+        self.intro_frame = create_content_frame(self.master)
+
+        heading = Label(self.intro_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
+        labels = create_images(self.intro_frame, self.current_unit.intro_path())
+
+        show_label_images(labels)
+        heading.grid(row=0, sticky=(N, S, E, W), columnspan=4)
+        self.intro_frame.grid(row=0, column=0)
+
+        prev_button = Button(self.intro_frame, text="Назад", state="disabled", width=10)
+        prev_button.grid(row=2, column=0, sticky=(W, S))
+        if mgr.current_unit_idx:
+            prev_button.bind("<Button-1>", self._previous_unit)
+
+        next_button = Button(self.intro_frame, text="Продължи", width=10)
+        next_button.grid(row=2, column=3, sticky=(E, S))
+        if mgr.current_ex_idx < len(self.current_unit.exercises):
+            next_button.bind("<Button-1>", self._first_unit_exercise)
+
+    def _to_first_ex(self):
+        frame, buttons = self.frames[self.current_notebook_tab_index]
+        buttons[0].configure(background="green")
+        buttons[1].configure(background="yellow")
+        self.intro_frame.grid_forget()
+        self._loadFirstEx()
+
+    def _to_intro(self):
+        self.intro_frame.grid(row=0, column=0)
+        self.first_ex_frame.grid_forget()
+
+    def _current_ex_callback(self):
+        # Check every 200 ms if the user has logged in
+        self.after_current_ex_id = self.current_ex_frame.after(200, self._current_ex_callback)
+
+        filled = False
+
+        for (entry, string) in self.first_ex_entries:
+            filled = not(string.get() == "")
+            entry.delete(1, len(string.get()))
+
+        if filled:
+            self.current_ex_frame.after_cancel(self.after_current_ex_id)
+            self.current_next_button.configure(state="normal")
+
+    def _back_to_first_ex(self):
+        self.first_ex_frame.grid(row=0, column=0)
         self.load_second_ex_frame.grid_forget()
 
-    def _toDictation(self):
-        if self._check_secondEx_answers("раницаполашапка"):
-            messagebox.showinfo("Правилен отговор",
-            ":) Продължавай напред!")
-            frame, buttons = self.frames[self.notebook.index(self.current_tab)]
-            buttons[2].configure(background="green")
-            buttons[3].configure(background="yellow")
-            self.load_second_ex_frame.grid_forget()
-            self._loadDictation()
+    def _to_dictation(self, event):
+        if self._check_exercise_answers():
+            messagebox.showinfo("Правилен отговор", ":) Продължавай напред!")
+            frame, buttons = self.frames[self.current_notebook_tab_index]
+            buttons[self.current_button_idx].configure(background="green")
+            self.current_button_idx += 1
+            buttons[self.current_button_idx].configure(background="yellow")
+            self.current_ex_frame.grid_forget()
+            self._load_dictation()
 
-    def _loadDictation(self):
-        self.load_dictation_frame = self._create_frame(self.master, width=450, height=400, relief=RAISED, borderwidth=1, background=SEA_GREEN)
+    def _load_dictation(self):
+        self.load_dictation_frame = create_content_frame(self.master)
 
-        heading = Label(self.load_dictation_frame, text="Буквата Аа", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = self._load_pictures(self.load_dictation_frame, "../images/Letters/a/", ["UC2.png"])
+        heading = Label(self.load_dictation_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
+        pictures = create_images(self.load_dictation_frame, self.current_unit.dictation_path())
 
-        self._show_pictures1(pictures)
+        show_pictures(pictures)
         heading.grid(row=0, sticky=(N, S, E, W), columnspan=4)
         self.load_dictation_frame.grid(row=0, column=0)
 
-        prevButton = Button(self.load_dictation_frame, text="Назад", command=self._backToSecondEx)#, width=10
-        prevButton.grid(row=3, column=0, sticky=(W,S))
+        prev_button = Button(self.load_dictation_frame, text="Назад", command=self._back_to_second_ex)
+        prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        self.load_dictation_frame_nextButton = Button(self.load_dictation_frame, text="Продължи", command=self._toNextUnit)#, width=10
-        self.load_dictation_frame_nextButton.grid(row=3, column=3, sticky=(E,S))
+        self.load_dictation_frame_nextButton = Button(self.load_dictation_frame, text="Продължи", command=self._to_next_unit)
+        self.load_dictation_frame_nextButton.grid(row=3, column=5, sticky=(E, S))
 
-    def _backToSecondEx(self):
+    def _back_to_second_ex(self):
         self.load_second_ex_frame.grid(row=0, column=0)
         self.load_dictation_frame.grid_forget()
 
-    def _toNextUnit(self):
-        frame, buttons = self.frames[self.notebook.index(self.current_tab)]
+    def _to_next_unit(self):
+        frame, buttons = self.frames[self.current_notebook_tab_index]
         buttons[3].configure(background="green")
         frame.configure(background="green")
         self.load_dictation_frame.grid_forget()
         self.tabs = self.notebook.tabs()
-        self.current_tab = self.tabs[1]
+        self.current_notebook_tab_index += 1
+        self.current_tab = self.tabs[self.current_notebook_tab_index]
         self.notebook.tab(self.current_tab, state="normal")
-        frame, buttons = self.frames[self.notebook.index(self.current_tab)]
-        self.notebook.select(self.notebook.index(self.current_tab))
+        frame, buttons = self.frames[self.current_notebook_tab_index]
+        self.notebook.select(self.current_notebook_tab_index)
         buttons[0].configure(background="yellow")
         buttons[0].config(relief=SUNKEN)
-        self._loadSUIntro()
+        self._load_second_unit_intro()
 
-    def _backToFU(self):
+    def _back_to_first_unit(self):
+        # TODO: FIX THIS METHOD - IT CAN BE IMPLEMENTED AS BACK_TO_PREVIOUS_UNIT. Instead of hard coding the tabs index use the current_notebook_tab_index-1 etc...
         self.load_SU_intro_frame.grid_forget()
         self.notebook.select(self.notebook.index(self.tabs[0]))
         self.tabs = self.notebook.tabs()
         self.current_tab = self.tabs[1]
-        self.load_intro_frame.grid(row=0, column=0)
+        self.intro_frame.grid(row=0, column=0)
 
-    def _loadSUIntro(self):
-        self.load_SU_intro_frame = self._create_frame(self.master, width=450, height=400, relief=RAISED, borderwidth=1, background=SEA_GREEN)
+    def _load_second_unit_intro(self):
+        self.load_SU_intro_frame = create_content_frame(self.master)
 
         heading = Label(self.load_SU_intro_frame, text="Буквата Ъъ", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = self._load_pictures(self.load_SU_intro_frame, "../images/Letters/ъ/", ["ъ1.png", "ъ2.png", "ъ3.png", "ъ4.png"])
+        pictures = create_images(self.load_SU_intro_frame, "../images/Letters/ъ/intro/")
 
-        self._show_pictures1(pictures)
+        show_pictures1(pictures)
         heading.grid(row=0, sticky=(N, S, E, W), columnspan=16)
         self.load_SU_intro_frame.grid(row=0, column=0)
 
-        prevButton = Button(self.load_SU_intro_frame, text="Назад", command=self._backToFU)
-        prevButton.grid(row=3, column=0, sticky=(W,S))
+        prev_button = Button(self.load_SU_intro_frame, text="Назад", command=self._back_to_first_unit)
+        prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        self.load_SU_intro_frame_nextButton = Button(self.load_SU_intro_frame, text="Продължи", command=self._SUtoFirstEx)
-        self.load_SU_intro_frame_nextButton.grid(row=3, column=15, sticky=(E,S))
+        self.load_SU_intro_frame_nextButton = Button(self.load_SU_intro_frame, text="Продължи", command=self._second_unit_to_first_ex)
+        self.load_SU_intro_frame_nextButton.grid(row=3, column=15, sticky=(E, S))
 
-    def _SUtoFirstEx(self):
+    def _second_unit_to_first_ex(self):
         pass

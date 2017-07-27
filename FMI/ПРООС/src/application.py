@@ -3,12 +3,13 @@ from PIL import Image, ImageTk
 
 from loginframe import *
 from menu import *
+from utilities import *
 
-
-class Application(tk.Tk):
+class Application(tk.Toplevel):
     
     def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
+        #tk.Tk.__init__(self, *args, **kwargs)
+        super(Application, self).__init__(*args, **kwargs)
 
         # Set window title
         self.m_title = tk.Tk.title(self, string="Learn by practice")
@@ -65,7 +66,7 @@ class BackgroundFrame(Frame):
 
         self.background_image = ImageTk.PhotoImage(self.image)
 
-        self.background = Label(self, image=self.background_image)
+        self.background = tk.Label(self, image=self.background_image)
         self.background.grid(row=0, column=0, sticky=N+S+E+W)
         self.background.grid_rowconfigure(0, weight=1)
         self.background.grid_columnconfigure(0, weight=1)
