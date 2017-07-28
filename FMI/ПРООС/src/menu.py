@@ -8,6 +8,10 @@ def style_config():
     ttk.Style().configure("RB.TButton", foreground='maroon',
                           background='black', font=('Helvetica', 12))
 
+def clear_grid(root):
+    for entry in root.grid_slaves():
+        entry.destroy()
+
 style_config()
 
 
@@ -18,6 +22,13 @@ class Menu:
         self.master = master
         
         self.notebook = ttk.Notebook(self.master)
+
+        self.previous_unit = None
+        self.current_unit = None
+
+        self.temp_ex_frame = None
+        self.previous_ex_frame = None
+        self.current_ex_frame = None
 
         self.frames = []
 
@@ -85,32 +96,50 @@ class Menu:
 
     def _first_unit_exercise(self, event):
         # Prepare the notebook for the next unit
+
         frame, buttons = self.frames[self.current_notebook_tab_index]
         buttons[self.current_button_idx].configure(background="green")
         self.current_button_idx += 1
         buttons[self.current_button_idx].configure(background="yellow")
+
+        # TODO: Change intro_frame to previous = current_frame and forget it
         self.intro_frame.grid_forget()
 
-        self._load_first_exercise()
+        self._load_exercise()
 
-    def _load_first_exercise(self):
-        self.current_ex_frame = self.first_ex_frame = create_content_frame(self.master)
+    def _previous_unit_ex(self, event):
+        mgr.previous_ex()
+        self.current_button_idx -= 1
+        self.previous_ex_frame.grid(row=0, column=0)
+        self.current_ex_frame.grid_forget()
+        self.previous_ex_frame = self.current_ex_frame
+        self.current_ex_frame = self.temp_ex_frame
 
-        heading = Label(self.first_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = create_images(self.first_ex_frame, mgr.current_ex_path())
 
-        self.current_ex_entries = self.first_ex_entries = load_entries(self.first_ex_frame)
+    def _load_exercise(self):
+        self.current_ex_frame = create_content_frame(self.master)
+
+        heading = Label(self.current_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
+        pictures = create_images(self.current_ex_frame, mgr.current_ex_path())
+
+        self.current_ex_entries = load_entries(self.current_ex_frame)
         show_pictures(pictures)
         heading.grid(row=0, sticky=(N, S, E, W), columnspan=len("".join(mgr.current_ex))+1)
-        self.first_ex_frame.grid(row=0, column=0)
+        self.current_ex_frame.grid(row=0, column=0)
 
-        prev_button = Button(self.first_ex_frame, text="Назад", command=self._to_intro)
+        prev_button = Button(self.current_ex_frame, text="Назад")
+        if mgr.current_ex_idx:
+            prev_button.bind("<Button-1>", self._previous_unit_ex)
+        else:
+            prev_button.bind("<Button-1>", self._to_unit_intro)
         prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        self.current_next_button = self.load_first_ex_frame_nextButton = Button(self.first_ex_frame, text="Продължи", state="disabled")
+        self.current_next_button = self.load_first_ex_frame_nextButton = Button(self.current_ex_frame, text="Продължи", state="disabled")
         self.load_first_ex_frame_nextButton.grid(row=3, column=len("".join(mgr.current_ex)), sticky=(E, S))
-        if mgr.current_ex_idx < len(self.current_unit.exercises):
+        if mgr.current_ex_idx + 1 < len(self.current_unit.exercises):
             self.load_first_ex_frame_nextButton.bind("<Button-1>", self._next_unit_exercise)
+        else:
+            self.load_first_ex_frame_nextButton.bind("<Button-1>", self._to_unit_dictation)
 
         self._current_ex_callback()
 
@@ -121,33 +150,19 @@ class Menu:
             buttons[self.current_button_idx].configure(background="green")
             self.current_button_idx += 1
             buttons[self.current_button_idx].configure(background="yellow")
+            # TODO: Change intro_frame to previous = current_frame and forget it
+            #if self.temp_ex_frame and self.temp_ex_frame is not None:
+            self.temp_ex_frame = self.current_ex_frame
             self.current_ex_frame.grid_forget()
             mgr.next_ex()
-            self._load_second_exercise()
+            if self.previous_ex_frame and self.previous_ex_frame is not None:
+                self.previous_ex_frame.grid(row=0, column=0)
+                self.current_ex_frame = self.previous_ex_frame
+            else:
+                self.previous_ex_frame = self.current_ex_frame
+                self._load_exercise()
 
-    def _load_second_exercise(self):
-        self.current_ex_frame = self.load_second_ex_frame = create_content_frame(self.master)
 
-        heading = Label(self.load_second_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = create_images(self.load_second_ex_frame, mgr.current_ex_path())
-
-        self.current_ex_entries = self.second_ex_entries = load_entries(self.load_second_ex_frame)
-        show_pictures(pictures)
-        heading.grid(row=0, sticky=(N, S, E, W), columnspan=len("".join(mgr.current_ex))+1)
-        self.load_second_ex_frame.grid(row=0, column=0)
-
-        prev_button = Button(self.load_second_ex_frame, text="Назад", command=self._back_to_first_ex)
-        prev_button.grid(row=3, column=0, sticky=(W, S))
-
-        self.current_next_button = self.load_second_ex_frame_nextButton = Button(self.load_second_ex_frame, text="Продължи", state="disabled")
-        self.load_second_ex_frame_nextButton.grid(row=3, column=len("".join(mgr.current_ex)), sticky=(E, S))
-
-        if mgr.current_ex_idx + 1 < len(self.current_unit.exercises):
-            self.load_second_ex_frame_nextButton.bind("<Button-1>", self._next_unit_exercise)
-        else:
-            self.load_second_ex_frame_nextButton.bind("<Button-1>", self._to_dictation)
-
-        self._current_ex_callback()
 
     def _check_exercise_answers(self):
         words = "".join(mgr.current_ex)
@@ -176,6 +191,23 @@ class Menu:
             return False
         return True
 
+    def _previous_unit(self, event):
+        frame, buttons = self.frames[self.current_notebook_tab_index]
+        buttons[3].configure(background="green")
+        frame.configure(background="green")
+        self.intro_frame.grid_forget()
+
+        self.tabs = self.notebook.tabs()
+        self.current_notebook_tab_index -= 1
+        self.current_tab = self.tabs[self.current_notebook_tab_index]
+        self.notebook.select(self.current_notebook_tab_index)
+
+        self.current_button_idx = 0
+
+        self.previous_unit = self.current_unit
+        mgr.previous_unit()
+        self._load_intro()
+
     def _load_intro(self):
         self.current_unit = mgr.current_unit
         self.intro_frame = create_content_frame(self.master)
@@ -190,6 +222,7 @@ class Menu:
         prev_button = Button(self.intro_frame, text="Назад", state="disabled", width=10)
         prev_button.grid(row=2, column=0, sticky=(W, S))
         if mgr.current_unit_idx:
+            prev_button.configure(state="normal")
             prev_button.bind("<Button-1>", self._previous_unit)
 
         next_button = Button(self.intro_frame, text="Продължи", width=10)
@@ -197,16 +230,10 @@ class Menu:
         if mgr.current_ex_idx < len(self.current_unit.exercises):
             next_button.bind("<Button-1>", self._first_unit_exercise)
 
-    def _to_first_ex(self):
-        frame, buttons = self.frames[self.current_notebook_tab_index]
-        buttons[0].configure(background="green")
-        buttons[1].configure(background="yellow")
-        self.intro_frame.grid_forget()
-        self._loadFirstEx()
-
-    def _to_intro(self):
+    def _to_unit_intro(self, event):
+        self.current_button_idx -= 1
+        self.current_ex_frame.grid_forget()
         self.intro_frame.grid(row=0, column=0)
-        self.first_ex_frame.grid_forget()
 
     def _current_ex_callback(self):
         # Check every 200 ms if the user has logged in
@@ -214,7 +241,7 @@ class Menu:
 
         filled = False
 
-        for (entry, string) in self.first_ex_entries:
+        for (entry, string) in self.current_ex_entries:
             filled = not(string.get() == "")
             entry.delete(1, len(string.get()))
 
@@ -222,22 +249,19 @@ class Menu:
             self.current_ex_frame.after_cancel(self.after_current_ex_id)
             self.current_next_button.configure(state="normal")
 
-    def _back_to_first_ex(self):
-        self.first_ex_frame.grid(row=0, column=0)
-        self.load_second_ex_frame.grid_forget()
-
-    def _to_dictation(self, event):
+    def _to_unit_dictation(self, event):
         if self._check_exercise_answers():
             messagebox.showinfo("Правилен отговор", ":) Продължавай напред!")
             frame, buttons = self.frames[self.current_notebook_tab_index]
             buttons[self.current_button_idx].configure(background="green")
             self.current_button_idx += 1
             buttons[self.current_button_idx].configure(background="yellow")
+            self.previous_ex_frame = self.current_ex_frame
             self.current_ex_frame.grid_forget()
             self._load_dictation()
 
     def _load_dictation(self):
-        self.load_dictation_frame = create_content_frame(self.master)
+        self.current_ex_frame = self.load_dictation_frame = create_content_frame(self.master)
 
         heading = Label(self.load_dictation_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
         pictures = create_images(self.load_dictation_frame, self.current_unit.dictation_path())
@@ -246,30 +270,40 @@ class Menu:
         heading.grid(row=0, sticky=(N, S, E, W), columnspan=4)
         self.load_dictation_frame.grid(row=0, column=0)
 
-        prev_button = Button(self.load_dictation_frame, text="Назад", command=self._back_to_second_ex)
+        prev_button = Button(self.load_dictation_frame, text="Назад")
+        prev_button.bind("<Button-1>", self._previous_unit_ex)
         prev_button.grid(row=3, column=0, sticky=(W, S))
 
-        self.load_dictation_frame_nextButton = Button(self.load_dictation_frame, text="Продължи", command=self._to_next_unit)
+        self.load_dictation_frame_nextButton = Button(self.load_dictation_frame, text="Продължи", state="disabled", command=self._to_next_unit)
+        if self.current_notebook_tab_index + 1 < len(self.tabs):
+            self.load_dictation_frame_nextButton.configure(state="normal")
         self.load_dictation_frame_nextButton.grid(row=3, column=5, sticky=(E, S))
 
+    """
     def _back_to_second_ex(self):
         self.load_second_ex_frame.grid(row=0, column=0)
         self.load_dictation_frame.grid_forget()
-
+    """
     def _to_next_unit(self):
         frame, buttons = self.frames[self.current_notebook_tab_index]
         buttons[3].configure(background="green")
         frame.configure(background="green")
         self.load_dictation_frame.grid_forget()
+
         self.tabs = self.notebook.tabs()
         self.current_notebook_tab_index += 1
         self.current_tab = self.tabs[self.current_notebook_tab_index]
         self.notebook.tab(self.current_tab, state="normal")
-        frame, buttons = self.frames[self.current_notebook_tab_index]
         self.notebook.select(self.current_notebook_tab_index)
-        buttons[0].configure(background="yellow")
-        buttons[0].config(relief=SUNKEN)
-        self._load_second_unit_intro()
+
+        self.current_button_idx = 0
+        frame, buttons = self.frames[self.current_notebook_tab_index]
+        buttons[self.current_button_idx].configure(background="yellow")
+        buttons[self.current_button_idx].config(relief=SUNKEN)
+
+        self.previous_unit = self.current_unit
+        mgr.next_unit()
+        self._load_intro()
 
     def _back_to_first_unit(self):
         # TODO: FIX THIS METHOD - IT CAN BE IMPLEMENTED AS BACK_TO_PREVIOUS_UNIT. Instead of hard coding the tabs index use the current_notebook_tab_index-1 etc...
@@ -279,6 +313,7 @@ class Menu:
         self.current_tab = self.tabs[1]
         self.intro_frame.grid(row=0, column=0)
 
+    """
     def _load_second_unit_intro(self):
         self.load_SU_intro_frame = create_content_frame(self.master)
 
@@ -297,3 +332,4 @@ class Menu:
 
     def _second_unit_to_first_ex(self):
         pass
+    """
