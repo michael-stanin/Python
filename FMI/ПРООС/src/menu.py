@@ -101,7 +101,6 @@ class Menu:
 
         # TODO: Change intro_frame to previous = current_frame and forget it
         self.intro_frame.grid_forget()
-
         self._load_exercise()
 
     def _previous_unit_ex(self, event):
@@ -109,12 +108,15 @@ class Menu:
         self.current_button_idx -= 1
         self.previous_ex_frame.grid(row=0, column=0)
         self.current_ex_frame.grid_forget()
-        self.previous_ex_frame = self.current_ex_frame
-        self.current_ex_frame = self.temp_ex_frame
+
+        self.temp_ex_frame = self.current_ex_frame
+        self.current_ex_frame = self.previous_ex_frame
+        self.previous_ex_frame = self.temp_ex_frame
 
 
     def _load_exercise(self):
-        self.current_ex_frame = create_content_frame(self.master)
+        if not self.current_ex_frame or self.current_ex_frame == self.previous_ex_frame:
+            self.current_ex_frame = create_content_frame(self.master)
 
         heading = Label(self.current_ex_frame, text=self.current_unit.name, background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
         pictures = create_images(self.current_ex_frame, mgr.current_ex_path())
@@ -147,19 +149,17 @@ class Menu:
             buttons[self.current_button_idx].configure(background="green")
             self.current_button_idx += 1
             buttons[self.current_button_idx].configure(background="yellow")
-            # TODO: Change intro_frame to previous = current_frame and forget it
-            #if self.temp_ex_frame and self.temp_ex_frame is not None:
-            self.temp_ex_frame = self.current_ex_frame
+
             self.current_ex_frame.grid_forget()
+            self.temp_ex_frame = self.current_ex_frame
             mgr.next_ex()
             if self.previous_ex_frame and self.previous_ex_frame is not None:
                 self.previous_ex_frame.grid(row=0, column=0)
                 self.current_ex_frame = self.previous_ex_frame
+                self.previous_ex_frame = self.temp_ex_frame
             else:
                 self.previous_ex_frame = self.current_ex_frame
                 self._load_exercise()
-
-
 
     def _check_exercise_answers(self):
         words = "".join(mgr.current_ex)
