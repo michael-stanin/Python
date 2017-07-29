@@ -4,15 +4,10 @@ from unitsmanager import UnitsManager
 from utilities import *
 
 
-def style_config():
-    ttk.Style().configure("RB.TButton", foreground='maroon',
-                          background='black', font=('Helvetica', 12))
-
 def clear_grid(root):
     for entry in root.grid_slaves():
         entry.destroy()
 
-style_config()
 
 
 class Menu:
@@ -31,6 +26,8 @@ class Menu:
         self.current_ex_frame = None
 
         self.frames = []
+
+        style_config()
 
     def show(self):
         self.notebook.grid(column=0, row=0, columnspan=2, sticky=N)

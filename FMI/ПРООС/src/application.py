@@ -5,7 +5,7 @@ from loginframe import *
 from menu import *
 from utilities import *
 
-class Application(tk.Toplevel):
+class Application(tk.Tk):
     
     def __init__(self, *args, **kwargs):
         #tk.Tk.__init__(self, *args, **kwargs)

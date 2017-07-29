@@ -96,3 +96,6 @@ def load_entries(master):
         entry = make_entry(master, 2, i, width=2, textvariable=entry_string, bg=background_color)
         entries.append((entry, entry_string))
     return entries
+
+def style_config():
+    ttk.Style().configure("RB.TButton", foreground='maroon', background='black', font=('Helvetica', 12))
