@@ -188,23 +188,6 @@ class Menu:
             return False
         return True
 
-    def _previous_unit(self, event):
-        frame, buttons = self.frames[self.current_notebook_tab_index]
-        buttons[3].configure(background="green")
-        frame.configure(background="green")
-        self.intro_frame.grid_forget()
-
-        self.tabs = self.notebook.tabs()
-        self.current_notebook_tab_index -= 1
-        self.current_tab = self.tabs[self.current_notebook_tab_index]
-        self.notebook.select(self.current_notebook_tab_index)
-
-        self.current_button_idx = 0
-
-        self.previous_unit = self.current_unit
-        mgr.previous_unit()
-        self._load_intro()
-
     def _load_intro(self):
         self.current_unit = mgr.current_unit
         self.intro_frame = create_content_frame(self.master)
@@ -276,11 +259,6 @@ class Menu:
             self.load_dictation_frame_nextButton.configure(state="normal")
         self.load_dictation_frame_nextButton.grid(row=3, column=5, sticky=(E, S))
 
-    """
-    def _back_to_second_ex(self):
-        self.load_second_ex_frame.grid(row=0, column=0)
-        self.load_dictation_frame.grid_forget()
-    """
     def _to_next_unit(self):
         frame, buttons = self.frames[self.current_notebook_tab_index]
         buttons[3].configure(background="green")
@@ -302,31 +280,16 @@ class Menu:
         mgr.next_unit()
         self._load_intro()
 
-    def _back_to_first_unit(self):
-        # TODO: FIX THIS METHOD - IT CAN BE IMPLEMENTED AS BACK_TO_PREVIOUS_UNIT. Instead of hard coding the tabs index use the current_notebook_tab_index-1 etc...
-        self.load_SU_intro_frame.grid_forget()
-        self.notebook.select(self.notebook.index(self.tabs[0]))
+    def _previous_unit(self, event):
+        self.intro_frame.grid_forget()
+
         self.tabs = self.notebook.tabs()
-        self.current_tab = self.tabs[1]
-        self.intro_frame.grid(row=0, column=0)
+        self.current_notebook_tab_index -= 1
+        self.current_tab = self.tabs[self.current_notebook_tab_index]
+        self.notebook.select(self.current_notebook_tab_index)
 
-    """
-    def _load_second_unit_intro(self):
-        self.load_SU_intro_frame = create_content_frame(self.master)
+        self.current_button_idx = 0
 
-        heading = Label(self.load_SU_intro_frame, text="Буквата Ъъ", background=SEA_GREEN, font=("Helvetica", 20), fg="cyan")
-        pictures = create_images(self.load_SU_intro_frame, "../images/Letters/ъ/intro/")
-
-        show_pictures1(pictures)
-        heading.grid(row=0, sticky=(N, S, E, W), columnspan=16)
-        self.load_SU_intro_frame.grid(row=0, column=0)
-
-        prev_button = Button(self.load_SU_intro_frame, text="Назад", command=self._back_to_first_unit)
-        prev_button.grid(row=3, column=0, sticky=(W, S))
-
-        self.load_SU_intro_frame_nextButton = Button(self.load_SU_intro_frame, text="Продължи", command=self._second_unit_to_first_ex)
-        self.load_SU_intro_frame_nextButton.grid(row=3, column=15, sticky=(E, S))
-
-    def _second_unit_to_first_ex(self):
-        pass
-    """
+        self.previous_unit = self.current_unit
+        mgr.previous_unit()
+        self._load_intro()
