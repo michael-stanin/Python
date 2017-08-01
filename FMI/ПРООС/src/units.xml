@@ -18,6 +18,24 @@
             </ex>
         </exercises>
     </unit>
+    <unit name="Буквата Бб" images = "../images/Letters/б/">
+        <exercises>
+            <ex>
+                <words>
+                    <word>БаБа</word>
+                    <word>Бастун</word>
+                    <word>Балон</word>
+                </words>
+            </ex>
+            <ex>
+                <words>
+                    <word>БоБър</word>
+                    <word>Банан</word>
+                    <word>Ботуши</word>
+                </words>
+            </ex>
+        </exercises>
+    </unit>
     <unit name="Буквата Ъъ" images = "../images/Letters/ъ/">
         <exercises>
             <ex>
