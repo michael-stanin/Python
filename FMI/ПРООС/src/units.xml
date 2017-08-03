@@ -36,7 +36,7 @@
             </ex>
         </exercises>
     </unit>
-    <unit name="Буквата Ъъ" images = "../images/Letters/ъ/">
+    <!--unit name="Буквата Ъъ" images = "../images/Letters/ъ/">
         <exercises>
             <ex>
                 <words>
@@ -53,5 +53,5 @@
                 </words>
             </ex>
         </exercises>
-    </unit>
+    </unit-->
 </units>

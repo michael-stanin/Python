@@ -1,13 +1,13 @@
 import os
 import glob
-from tkinter import ttk, Frame, Button, PhotoImage, Label, Entry, messagebox
-from tkinter import N, S, E, W, RAISED, SUNKEN, StringVar
+from tkinter import ttk, Frame, PhotoImage, Label, Entry
+from tkinter import N, S, E, W, RAISED, StringVar
 from unitsmanager import UnitsManager
 
 
 SEA_GREEN = "#2E8B57"
 
-mgr = UnitsManager()
+units_manager = UnitsManager()
 
 
 def is_valid_file(f):
@@ -21,9 +21,6 @@ def extract_file_paths(path):
         if is_valid_file(f):
             t.append(f)
     return t
-
-
-
 
 
 def configure_frame(frame, buttons):
@@ -57,18 +54,20 @@ def create_images(master, path):
     return images
 
 
-def show_label_images(labels):
-    for i, label in enumerate(labels):
-        label.grid(row=1, column=i, sticky=(N, E, S, W), padx=5, pady=5)
-
-
-def show_pictures(pictures):
+def show_pictures(pictures, needs_span=True):
     column = 0
-    words = mgr.current_ex
+    words = units_manager.current_ex
+    options = {'row': 1, 'sticky': (S, N, W), 'padx': 5, 'pady': 5}
     for i, picture in enumerate(pictures):
-        span = len(words[i])
-        picture.grid(row=1, columnspan=span, column=column, sticky=(S, N, W), padx=5, pady=5)
-        column += span
+        if needs_span:
+            span = len(words[i])
+            options['columnspan'] = span
+            options['column'] = column
+            column += span
+        else:
+            column = i
+            options['column'] = column
+        picture.grid(options)
 
 
 def load_pictures(master, path, pictures):
@@ -89,13 +88,14 @@ def make_entry(master, row, column, **options):
 
 def load_entries(master):
     entries = []
-    words = "".join(mgr.current_ex)
+    words = "".join(units_manager.current_ex)
     for i, c in enumerate(words):
         entry_string = StringVar()
         background_color = "dark cyan" if c.isupper() else "cyan"
         entry = make_entry(master, 2, i, width=2, textvariable=entry_string, bg=background_color)
         entries.append((entry, entry_string))
     return entries
+
 
 def style_config():
     ttk.Style().configure("RB.TButton", foreground='maroon', background='black', font=('Helvetica', 12))

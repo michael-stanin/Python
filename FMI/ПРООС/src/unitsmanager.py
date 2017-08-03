@@ -36,12 +36,14 @@ class UnitsManager:
             self.current_unit_idx += 1
             self.current_unit = self.units[self.current_unit_idx]
             self.current_ex_idx = 0
+            self.current_ex_ = self.current_unit_.exercises[self.current_ex_idx]
 
     def previous_unit(self):
         if self.current_unit_idx > 0:
             self.current_unit_idx -= 1
             self.current_unit = self.units[self.current_unit_idx]
             self.current_ex_idx = 0
+            self.current_ex_ = self.current_unit_.exercises[self.current_ex_idx]
 
     def next_ex(self):
         if self.current_ex_idx < len(self.current_unit.exercises):
